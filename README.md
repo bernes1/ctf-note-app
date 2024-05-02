@@ -6,7 +6,7 @@ Do you also have the problem with not knowing what banger tunes you sould listen
 
 
 
-
+# database plan??
 
 ### some toughts about the database
  we write some of that squeel 
@@ -51,10 +51,17 @@ CREATE TABLE DJset (
 ```
 
 
+# Setup
 
+Create a .env file with the following contents
 
-we cooking
+```
+  // .env
+  DATABASE_URL = "postgresql://user:password@postgresserver/db"
+  POSTGRES_USER = "postgres"
+  POSTGRES_PASSWORD = "postgres"
+  POSTGRES_SERVER = "localhost"
+  POSTGRES_PORT = "5432"
+  POSTGRES_DB = "setsdb"
+```
 
-we cooking up this app becuase school assignment. 
-
-we cooking
