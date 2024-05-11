@@ -5,6 +5,11 @@ we cooking upp a lil app for saving links to good dj sets and songs accross plat
 Do you also have the problem with not knowing what banger tunes you sould listen to when you have listened to bangers before.
 
 
+# feature requests
+get a nice TUI
+
+
+
 
 # database plan??
 
@@ -30,21 +35,23 @@ Do you also have the problem with not knowing what banger tunes you sould listen
 
 ```sql
 CREATE TABLE Platform (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    UNIQUE(name)
 );
 
 CREATE TABLE Artist (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    UNIQUE(name)
 );
 
 CREATE TABLE DJset (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     url VARCHAR(255) NOT NULL,
-    platform_id INT NOT NULL,
-    artist_id INT NOT NULL,
+    platform_id INTEGER NOT NULL,
+    artist_id INTEGER NOT NULL,
     FOREIGN KEY (platform_id) REFERENCES Platform(id),
     FOREIGN KEY (artist_id) REFERENCES Artist(id)
 );
@@ -53,15 +60,47 @@ CREATE TABLE DJset (
 
 # Setup
 
-Create a .env file with the following contents
+## Prerequisites
+
+Before running the program, make sure you have the following:
+
+- Docker installed on your machine https://docs.docker.com/get-docker/
+- Go programming language installed https://go.dev/doc/install
+
+
+
+### Getting started
+
+First make a folder called vars in the project folder
+```shell
+ cd music-cooking
+ mkdir vars
+```
+
+Create a .env file in vars folder with the following contents
 
 ```
-  // .env
-  DATABASE_URL = "postgresql://user:password@postgresserver/db"
-  POSTGRES_USER = "postgres"
-  POSTGRES_PASSWORD = "postgres"
-  POSTGRES_SERVER = "localhost"
-  POSTGRES_PORT = "5432"
-  POSTGRES_DB = "setsdb"
+  // vars/.env
+  DATABASE_URL =postgresql://user:password@postgresserver/db
+  POSTGRES_USER =postgres
+  POSTGRES_PASSWORD = postgres
+  POSTGRES_SERVER = localhost
+  POSTGRES_PORT = 5432
+  POSTGRES_DB = setsdb
 ```
+After you have added the .env file to the vars folder run this comand in the project root folder.
+
+```shell
+docker compose --env-file="vars/.env" up -d
+```
+this comand wil start the database.
+
+
+To run the program run the following 
+```shell
+go run src/main.go
+``` 
+
+
+
 
