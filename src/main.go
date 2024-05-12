@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -25,11 +26,13 @@ type Artist struct {
 }
 
 type DJset struct {
-	Id       int
-	Name     string
-	Url      string
-	Platform *Platform
-	Artist   *Artist
+	Id           int64
+	Name         string
+	Url          string
+	PlatformId   int64
+	PlatformName string
+	ArtistId     int64
+	ArtistName   string
 }
 
 func main() {
@@ -41,16 +44,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Connected to database")
-	getAllDJSets(db)
-	// addNewDJSet(db)
-	getArtists(db)
-	// getPlatforms(db)
+	defer pool.Close()
+
+	fmt.Println("Startup successful")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter 'add' to add a new DJ set, 'export' to export all DJ sets, or 'all' to list all DJ sets")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+
+	if input == "add" {
+		addNewDJSet(pool)
+	} else if input == "export" {
+		exportDjSets(pool)
+	} else if input == "all" {
+		getAllDJSets(pool)
+	} else {
+		fmt.Println("Invalid input")
+	}
 }
 
 func getArtists(db *pgxpool.Pool) {
@@ -93,17 +108,6 @@ func addNewPlatform(db *pgxpool.Pool, platformName string) (int, error) {
 	return platformID, nil
 }
 
-// gettting the various data
-func getAllDJSets(db *pgxpool.Pool) {
-	ctx := context.Background()
-	var djsets []*DJset
-	pgxscan.Select(ctx, db, &djsets, "Select * from djset")
-	fmt.Println("DJ Sets:")
-	for _, djset := range djsets {
-		fmt.Printf("ID: %d, Name: %s, URL: %s, Platform: %s, Artist: %s\n", djset.Id, djset.Name, djset.Url, djset.Platform.Name, djset.Artist.Name)
-	}
-}
-
 func addDJSet(db *pgxpool.Pool, artistID int, platformID int, djsetName string, djsetUrl string) error {
 	// Insert DJ set
 	_, err := db.Exec(context.Background(), "INSERT INTO djset (name, url, platform_id, artist_id) VALUES ($1, $2, $3, $4)", djsetName, djsetUrl, platformID, artistID)
@@ -113,12 +117,26 @@ func addDJSet(db *pgxpool.Pool, artistID int, platformID int, djsetName string, 
 	}
 	return nil
 }
+func getAllDJSets(db *pgxpool.Pool) {
+	ctx := context.Background()
+	var djsets []*DJset
+	pgxscan.Select(ctx, db, &djsets, `SELECT djset.*, platform.name as platform_name, artist.name as artist_name FROM djset 
+                                      JOIN platform ON djset.platform_id = platform.id
+                                      JOIN artist ON djset.artist_id = artist.id`)
+
+	for _, djset := range djsets {
+		fmt.Printf("ID: %d, Name: %s, URL: %s, Platform: %s, Artist: %s\n", djset.Id, djset.Name, djset.Url, djset.PlatformName, djset.ArtistName)
+	}
+}
 
 func addNewDJSet(db *pgxpool.Pool) error {
 	reader := bufio.NewReader(os.Stdin)
 
+	fmt.Println("--Information about artist and platform--")
 	getArtists(db)
+	fmt.Println("")
 	getPlatforms(db)
+	fmt.Printf("-----------------------------------------\n")
 
 	// Get the artist ID
 	fmt.Print("Enter artist ID or 'new' to add a new artist: ")
@@ -181,4 +199,25 @@ func addNewDJSet(db *pgxpool.Pool) error {
 
 }
 
-//TODO export djset from 1 artist in json
+func exportDjSets(db *pgxpool.Pool) {
+	//TODO export all djset in json
+	ctx := context.Background()
+	var djsets []*DJset
+	pgxscan.Select(ctx, db, &djsets, `SELECT djset.*, platform.name as platform_name, artist.name as artist_name FROM djset 
+                                      JOIN platform ON djset.platform_id = platform.id
+                                      JOIN artist ON djset.artist_id = artist.id`)
+
+	djsetList := make([]*DJset, 0)
+	for _, djset := range djsets {
+		djsetList = append(djsetList, djset)
+		fmt.Println(djset)
+	}
+	jsonexport, err := json.Marshal(djsetList)
+	if err != nil {
+		fmt.Println("Error marshalling json:", err)
+	}
+	err = os.WriteFile("djsetexport.json", jsonexport, os.ModePerm)
+	if err != nil {
+		fmt.Println("Error writing json file:", err)
+	}
+}
