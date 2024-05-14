@@ -102,6 +102,8 @@ func getAllDJSets(db *pgxpool.Pool) {
 		fmt.Printf("ID: %d, Name: %s, URL: %s, Platform: %s, Artist: %s\n", djset.Id, djset.Name, djset.Url, djset.PlatformName, djset.ArtistName)
 	}
 }
+
+// add functions
 func addNewArtist(db *pgxpool.Pool, artistName string) (int, error) {
 	// Insert artist and get ID
 	var artistID int
@@ -200,8 +202,8 @@ func addNewDJSet(db *pgxpool.Pool) error {
 
 }
 
+// json export function
 func exportDjSets(db *pgxpool.Pool) {
-	//TODO export all djset in json
 	ctx := context.Background()
 	var djsets []*DJset
 	pgxscan.Select(ctx, db, &djsets, `SELECT djset.*, platform.name as platform_name, artist.name as artist_name FROM djset 
