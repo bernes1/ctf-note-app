@@ -65,9 +65,11 @@ func main() {
 		getAllDJSets(pool)
 	} else {
 		fmt.Println("Invalid input")
+		os.Exit(1)
 	}
 }
 
+// get functions
 func getArtists(db *pgxpool.Pool) {
 	ctx := context.Background()
 	var artists []*Artist
@@ -76,16 +78,6 @@ func getArtists(db *pgxpool.Pool) {
 	for _, artist := range artists {
 		fmt.Printf("id: %s , name: %s\n", strconv.Itoa(artist.Id), artist.Name)
 	}
-}
-
-func addNewArtist(db *pgxpool.Pool, artistName string) (int, error) {
-	// Insert artist and get ID
-	var artistID int
-	err := db.QueryRow(context.Background(), "INSERT INTO artist (name) VALUES ($1) RETURNING id", artistName).Scan(&artistID)
-	if err != nil {
-		return 0, err
-	}
-	return artistID, nil
 }
 
 func getPlatforms(db *pgxpool.Pool) {
@@ -99,6 +91,26 @@ func getPlatforms(db *pgxpool.Pool) {
 
 }
 
+func getAllDJSets(db *pgxpool.Pool) {
+	ctx := context.Background()
+	var djsets []*DJset
+	pgxscan.Select(ctx, db, &djsets, `SELECT djset.*, platform.name as platform_name, artist.name as artist_name FROM djset 
+                                      JOIN platform ON djset.platform_id = platform.id
+                                      JOIN artist ON djset.artist_id = artist.id`)
+
+	for _, djset := range djsets {
+		fmt.Printf("ID: %d, Name: %s, URL: %s, Platform: %s, Artist: %s\n", djset.Id, djset.Name, djset.Url, djset.PlatformName, djset.ArtistName)
+	}
+}
+func addNewArtist(db *pgxpool.Pool, artistName string) (int, error) {
+	// Insert artist and get ID
+	var artistID int
+	err := db.QueryRow(context.Background(), "INSERT INTO artist (name) VALUES ($1) RETURNING id", artistName).Scan(&artistID)
+	if err != nil {
+		return 0, err
+	}
+	return artistID, nil
+}
 func addNewPlatform(db *pgxpool.Pool, platformName string) (int, error) {
 	var platformID int
 	err := db.QueryRow(context.Background(), "INSERT INTO platform (name) VALUES ($1) RETURNING id", platformName).Scan(&platformID)
@@ -110,23 +122,12 @@ func addNewPlatform(db *pgxpool.Pool, platformName string) (int, error) {
 
 func addDJSet(db *pgxpool.Pool, artistID int, platformID int, djsetName string, djsetUrl string) error {
 	// Insert DJ set
-	_, err := db.Exec(context.Background(), "INSERT INTO djset (name, url, platform_id, artist_id) VALUES ($1, $2, $3, $4)", djsetName, djsetUrl, platformID, artistID)
+	_, err := db.Exec(context.Background(), "INSERT INTO djset (name, url, platform_id, artist_id) VALUES ($1, $2, $3, $4) RETURNING id", djsetName, djsetUrl, platformID, artistID)
 	if err != nil {
 		fmt.Println("Error inserting into djsets:", err)
 		return err
 	}
 	return nil
-}
-func getAllDJSets(db *pgxpool.Pool) {
-	ctx := context.Background()
-	var djsets []*DJset
-	pgxscan.Select(ctx, db, &djsets, `SELECT djset.*, platform.name as platform_name, artist.name as artist_name FROM djset 
-                                      JOIN platform ON djset.platform_id = platform.id
-                                      JOIN artist ON djset.artist_id = artist.id`)
-
-	for _, djset := range djsets {
-		fmt.Printf("ID: %d, Name: %s, URL: %s, Platform: %s, Artist: %s\n", djset.Id, djset.Name, djset.Url, djset.PlatformName, djset.ArtistName)
-	}
 }
 
 func addNewDJSet(db *pgxpool.Pool) error {
