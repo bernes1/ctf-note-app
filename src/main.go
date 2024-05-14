@@ -215,7 +215,7 @@ func exportDjSets(db *pgxpool.Pool) {
 		djsetList = append(djsetList, djset)
 		fmt.Println(djset)
 	}
-	jsonexport, err := json.Marshal(djsetList)
+	jsonexport, err := json.MarshalIndent(djsetList, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshalling json:", err)
 	}
