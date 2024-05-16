@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -173,6 +174,10 @@ func addNewDJSet(db *pgxpool.Pool) error {
 		fmt.Print("Enter new artist name: ")
 		artistName, _ := reader.ReadString('\n')
 		artistName = strings.TrimSpace(artistName)
+		if artistName == "" || artistName == " " || artistName == "\n" {
+			fmt.Println("Invalid artist name")
+			return errors.New("invalid artist name")
+		}
 
 		// Add the new artist to the database and get the ID
 		artistID, err = addNewArtist(db, artistName)
@@ -199,6 +204,10 @@ func addNewDJSet(db *pgxpool.Pool) error {
 		fmt.Print("Enter new platform name: ")
 		platformName, _ := reader.ReadString('\n')
 		platformName = strings.TrimSpace(platformName)
+		if platformName == "" || platformName == " " || platformName == "\n" {
+			fmt.Println("invalid platform name")
+			return errors.New("invalid platform name")
+		}
 
 		// Add the new platform to the database and get the ID
 		platformID, err = addNewPlatform(db, platformName)
