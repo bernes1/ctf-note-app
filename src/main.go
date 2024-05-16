@@ -56,7 +56,13 @@ func main() {
 	for {
 		// Get user input
 		reader := bufio.NewReader(os.Stdin)
-		fmt.Println("Enter 'add' to add a new DJ set, 'export' to export all DJ sets, 'import' to import DJ sets, or 'all' to list all DJ sets, 'remove' to remove a DJ set, 'exit' to exit the program.")
+		fmt.Println("Enter one of the following commands:")
+		fmt.Println("'add' - to add a new DJ set")
+		fmt.Println("'remove' - to remove a DJ set")
+		fmt.Println("'import' - to import DJ sets")
+		fmt.Println("'export' - to export all DJ sets")
+		fmt.Println("'all' - to list all DJ sets")
+		fmt.Println("'exit' - to exit the program.")
 		fmt.Print("Enter command: ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
@@ -72,7 +78,7 @@ func main() {
 		} else if input == "remove" {
 			handleDJRemoval(pool)
 		} else if input == "exit" {
-			fmt.Println("Exiting program... Goodbye!")
+			fmt.Println("Goodbye!")
 			os.Exit(0)
 		} else {
 			fmt.Println("Invalid input")
