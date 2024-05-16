@@ -81,12 +81,12 @@ Create a .env file in vars folder with the following contents
 
 ```
   // vars/.env
-  DATABASE_URL =postgresql://user:password@postgresserver/db
-  POSTGRES_USER =postgres
-  POSTGRES_PASSWORD = postgres
-  POSTGRES_SERVER = localhost
-  POSTGRES_PORT = 5432
-  POSTGRES_DB = setsdb
+  DATABASE_URL=postgresql://postgres:postgres@localhost/setsdb
+  POSTGRES_USER=postgres
+  POSTGRES_PASSWORD=postgres
+  POSTGRES_SERVER=localhost
+  POSTGRES_PORT=5432
+  POSTGRES_DB=setsdb
 ```
 After you have added the .env file to the vars folder run this comand in the project root folder.
 
