@@ -70,7 +70,7 @@ func main() {
 		} else if input == "import" {
 			handleImportDJsets(pool)
 		} else if input == "remove" {
-			handleDjremoval(pool)
+			handleDJRemoval(pool)
 		} else {
 			fmt.Println("Invalid input")
 			os.Exit(1)
@@ -232,7 +232,7 @@ func removeDJSet(db *pgxpool.Pool, djsetID int) error {
 	}
 	return nil
 }
-func handleDjremoval(db *pgxpool.Pool) {
+func handleDJRemoval(db *pgxpool.Pool) {
 
 	fmt.Println("--Information about artist and platform--")
 	getAllDJSets(db)
