@@ -58,6 +58,7 @@ func main() {
 		// Get user input
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Println("Enter one of the following commands:")
+		fmt.Println("'info' - to get information about the program")
 		fmt.Println("'add' - to add a new DJ set")
 		fmt.Println("'remove' - to remove a DJ set")
 		fmt.Println("'import' - to import DJ sets")
@@ -78,6 +79,8 @@ func main() {
 			handleImportDJsets(pool)
 		} else if input == "remove" {
 			handleDJRemoval(pool)
+		} else if input == "info" {
+			information()
 		} else if input == "exit" {
 			fmt.Println("Goodbye!")
 			os.Exit(0)
@@ -86,6 +89,10 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func information() {
+	fmt.Println("This program allows you to manage DJ sets in a database")
 }
 
 // get functions
