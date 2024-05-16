@@ -268,7 +268,8 @@ func exportDjSets(db *pgxpool.Pool) {
 	if err != nil {
 		fmt.Println("Error marshalling json:", err)
 	}
-	fmt.Println(string(jsonexport))
+
+	fmt.Println("The following DJ-sets have been exported:\n", string(jsonexport))
 
 	err = os.WriteFile("djsetexport.json", jsonexport, os.ModePerm)
 	if err != nil {
