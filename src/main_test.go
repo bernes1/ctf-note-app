@@ -11,13 +11,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func TesaddDJSet(t *testing.T) {
+func TestAddDJSet(t *testing.T) {
 	ctx := context.Background()
 	err := godotenv.Load("../vars/.env")
+
 	if err != nil {
 		fmt.Println("Error loading .env file")
 		os.Exit(1)
 	}
+
 	db, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
@@ -78,6 +80,7 @@ func TestGetArtists(t *testing.T) {
 		os.Exit(1)
 	}
 	defer db.Close()
+	getArtists(db)
 
 }
 
