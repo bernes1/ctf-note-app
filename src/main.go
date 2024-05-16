@@ -53,24 +53,28 @@ func main() {
 	defer pool.Close()
 
 	fmt.Println("Startup successful")
+	for {
+		// Get user input
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("Enter 'add' to add a new DJ set, 'export' to export all DJ sets, 'import' to import DJ sets, or 'all' to list all DJ sets, 'remove' to remove a DJ set")
+		fmt.Print("Enter command: ")
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
 
-	// Get user input
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter 'add' to add a new DJ set, 'export' to export all DJ sets, 'import' to import DJ sets, or 'all' to list all DJ sets")
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-
-	if input == "add" {
-		addNewDJSet(pool)
-	} else if input == "export" {
-		exportDjSets(pool)
-	} else if input == "all" {
-		getAllDJSets(pool)
-	} else if input == "import" {
-		handleImportDJsets(pool)
-	} else {
-		fmt.Println("Invalid input")
-		os.Exit(1)
+		if input == "add" {
+			addNewDJSet(pool)
+		} else if input == "export" {
+			exportDjSets(pool)
+		} else if input == "all" {
+			getAllDJSets(pool)
+		} else if input == "import" {
+			handleImportDJsets(pool)
+		} else if input == "remove" {
+			handleDjremoval(pool)
+		} else {
+			fmt.Println("Invalid input")
+			os.Exit(1)
+		}
 	}
 }
 
@@ -218,6 +222,35 @@ func addNewDJSet(db *pgxpool.Pool) error {
 
 	return nil
 
+}
+
+func removeDJSet(db *pgxpool.Pool, djsetID int) error {
+	_, err := db.Exec(context.Background(), "DELETE FROM djset WHERE id = $1", djsetID)
+	if err != nil {
+		fmt.Println("Error removing DJ set:", err)
+		return err
+	}
+	return nil
+}
+func handleDjremoval(db *pgxpool.Pool) {
+
+	fmt.Println("--Information about artist and platform--")
+	getAllDJSets(db)
+	fmt.Printf("-----------------------------------------\n")
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter the ID of the DJ set you want to remove")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	djsetID, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Printf("invalid ID due to %s\n", err)
+		return
+	}
+	err = removeDJSet(db, djsetID)
+	if err != nil {
+		fmt.Printf("unable to remove DJ set due to %s\n", err)
+	}
 }
 
 // import function
